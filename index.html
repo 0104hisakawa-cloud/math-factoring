@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>因数分解 × 面積モデル｜中3 数学</title>
+<style>
+:root {
+  --bg: #fafaf7;
+  --panel: #ffffff;
+  --border: #d6d3c4;
+  --accent: #2563eb;
+  --text: #1f2937;
+  --muted: #6b7280;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, "Hiragino Maru Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding: 16px;
+  line-height: 1.5;
+}
+header h1 { font-size: 22px; margin: 0; font-weight: 600; }
+header h1 small { font-size: 13px; color: var(--muted); margin-left: 10px; font-weight: normal; }
+nav.tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0; }
+nav.tabs button {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text);
+  transition: background .15s, border-color .15s, color .15s;
+}
+nav.tabs button:hover { background: #f3f4f6; }
+nav.tabs button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+main {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+  max-width: 960px;
+  margin: 0 auto;
+}
+@media (min-width: 780px) {
+  main { grid-template-columns: 1.4fr 1fr; }
+  .formula, .explanation, .input-hint { grid-column: 1 / -1; }
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+.formula {
+  font-size: 26px;
+  text-align: center;
+  line-height: 1.7;
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", "Times New Roman", serif;
+  letter-spacing: 0.02em;
+}
+.formula .lhs { color: var(--text); }
+.formula .rhs { color: var(--accent); font-weight: 600; }
+.diagram-card { display: flex; flex-direction: column; }
+svg.diagram { width: 100%; height: auto; max-height: 420px; display: block; }
+.legend {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  font-size: 12px; color: var(--muted);
+  margin-top: 10px; justify-content: center;
+}
+.legend > span { display: flex; align-items: center; gap: 4px; }
+.legend .swatch { width: 16px; height: 14px; border-radius: 3px; display: inline-block; border: 1px solid rgba(0,0,0,0.1); }
+.controls label {
+  display: flex; align-items: center; gap: 12px; margin: 12px 0;
+}
+.controls .label-name {
+  width: 28px; font-weight: 600; text-align: center;
+  font-family: "Hiragino Mincho ProN", serif; font-size: 18px;
+}
+.controls input[type="range"] { flex: 1; accent-color: var(--accent); }
+.controls .value-input {
+  width: 88px; text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600; font-family: inherit; font-size: 15px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff; color: var(--text);
+}
+.controls .value-input:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+.input-hint {
+  font-size: 12px; color: var(--muted);
+  background: #fdf6e3;
+  border: 1px solid #f0e6c4;
+  border-radius: 8px;
+  padding: 8px 12px;
+  text-align: center;
+}
+.explanation { font-size: 14px; line-height: 1.8; }
+.explanation h3 { margin: 0 0 8px; font-size: 15px; color: var(--accent); }
+.explanation p { margin: 6px 0; }
+.explanation ul { margin: 6px 0; padding-left: 22px; }
+.explanation b { color: var(--accent); font-weight: 600; }
+footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 24px; padding-bottom: 16px; }
+
+/* Stacked fraction (HTML) */
+.fr {
+  display: inline-flex;
+  flex-direction: column;
+  vertical-align: -0.45em;
+  text-align: center;
+  line-height: 1.05;
+  font-size: 0.82em;
+  margin: 0 0.12em;
+}
+.fr .fn { border-bottom: 1.6px solid currentColor; padding: 0 0.25em; }
+.fr .fd { padding: 0 0.25em; }
+</style>
+</head>
+<body>
+<header>
+  <h1>因数分解 × 面積モデル <small>— 中3 数学</small></h1>
+</header>
+<nav class="tabs" id="tabs">
+  <button data-unit="common" class="active">① 共通因数</button>
+  <button data-unit="trinomial">② x²+(p+q)x+pq</button>
+  <button data-unit="diff">③ 平方の差</button>
+  <button data-unit="square">④ (a+b)²</button>
+</nav>
+<main>
+  <section class="card formula" id="formulaCard"></section>
+  <section class="card diagram-card">
+    <svg class="diagram" id="diagram" viewBox="0 0 480 360" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <pattern id="hatchNeg" patternUnits="userSpaceOnUse" width="9" height="9" patternTransform="rotate(45)">
+          <rect width="9" height="9" fill="#fecaca"/>
+          <line x1="0" y1="0" x2="0" y2="9" stroke="#dc2626" stroke-width="1.6"/>
+        </pattern>
+      </defs>
+    </svg>
+    <div class="legend" id="legend"></div>
+  </section>
+  <section class="card controls" id="controls"></section>
+  <section class="input-hint">
+    入力欄には整数のほか、<b>小数</b>（例：<code>1.5</code>、<code>-0.25</code>）や <b>分数</b>（例：<code>1/2</code>、<code>-3/4</code>）も入力できます。
+    スライダーは 0.5 刻み、入力欄はそれ以外の値も自由に。
+  </section>
+  <section class="card explanation" id="explanation"></section>
+</main>
+<footer>面積モデルで4単元すべての因数分解を統一的に見る</footer>
+
+<script>
+'use strict';
+
+// ============== Frac class (rational arithmetic) ==============
+function gcd(a, b) {
+  a = Math.abs(a); b = Math.abs(b);
+  while (b) { [a, b] = [b, a % b]; }
+  return a || 1;
+}
+
+class Frac {
+  constructor(n, d = 1) {
+    if (d === 0) throw new Error('div by 0');
+    if (!Number.isFinite(n) || !Number.isFinite(d)) {
+      this.n = 0; this.d = 1; return;
+    }
+    if (!Number.isInteger(n) || !Number.isInteger(d)) {
+      const f = Frac.fromNumber(n / d);
+      this.n = f.n; this.d = f.d; return;
+    }
+    if (d < 0) { n = -n; d = -d; }
+    const g = gcd(n, d);
+    this.n = n / g;
+    this.d = d / g;
+  }
+  static of(n, d = 1) { return new Frac(n, d); }
+  static parse(str) {
+    if (typeof str !== 'string') return null;
+    str = str.trim().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+    if (str === '' || str === '-' || str === '/' || str === '.') return null;
+    if (str.includes('/')) {
+      const parts = str.split('/');
+      if (parts.length !== 2) return null;
+      const n = parseFloat(parts[0]);
+      const d = parseFloat(parts[1]);
+      if (!Number.isFinite(n) || !Number.isFinite(d) || d === 0) return null;
+      if (Number.isInteger(n) && Number.isInteger(d)) return new Frac(n, d);
+      return Frac.fromNumber(n / d);
+    }
+    const v = parseFloat(str);
+    if (!Number.isFinite(v)) return null;
+    return Frac.fromNumber(v);
+  }
+  static fromNumber(x, maxDen = 24) {
+    if (Number.isInteger(x)) return new Frac(x);
+    if (!Number.isFinite(x)) return new Frac(0);
+    let bestN = Math.round(x), bestD = 1, bestErr = Math.abs(x - Math.round(x));
+    for (let d = 2; d <= maxDen; d++) {
+      const n = Math.round(x * d);
+      const err = Math.abs(x - n / d);
+      if (err < bestErr - 1e-15) {
+        bestN = n; bestD = d; bestErr = err;
+        if (err < 1e-12) break;
+      }
+    }
+    return new Frac(bestN, bestD);
+  }
+  add(o) { return new Frac(this.n * o.d + o.n * this.d, this.d * o.d); }
+  sub(o) { return new Frac(this.n * o.d - o.n * this.d, this.d * o.d); }
+  mul(o) { return new Frac(this.n * o.n, this.d * o.d); }
+  neg() { return new Frac(-this.n, this.d); }
+  abs() { return new Frac(Math.abs(this.n), this.d); }
+  pow2() { return this.mul(this); }
+  scale(k) { return new Frac(this.n * k, this.d); }
+  isZero() { return this.n === 0; }
+  isPos() { return this.n > 0; }
+  isNeg() { return this.n < 0; }
+  isInt() { return this.d === 1; }
+  isOne() { return this.n === 1 && this.d === 1; }
+  isNegOne() { return this.n === -1 && this.d === 1; }
+  cmp(o) { return Math.sign(this.n * o.d - o.n * this.d); }
+  num() { return this.n / this.d; }
+}
+
+// ============== Slot: Frac + display mode ==============
+class Slot {
+  constructor(val, mode = 'auto') {
+    this.val = val;
+    if (mode === 'auto') this.mode = val.isInt() ? 'int' : 'frac';
+    else this.mode = mode;
+  }
+  static fromString(str) {
+    const f = Frac.parse(str);
+    if (!f) return null;
+    let mode;
+    if (f.isInt()) mode = 'int';
+    else if (str.includes('/')) mode = 'frac';
+    else mode = 'dec';
+    return new Slot(f, mode);
+  }
+  static fromSliderNumber(x) {
+    const f = Frac.fromNumber(x);
+    return new Slot(f, f.isInt() ? 'int' : 'frac');
+  }
+  toInputStr() {
+    if (this.val.isInt()) return `${this.val.n}`;
+    if (this.mode === 'dec') {
+      return parseFloat(this.val.num().toFixed(4)).toString();
+    }
+    return `${this.val.n}/${this.val.d}`;
+  }
+  toSliderValue() { return this.val.num(); }
+}
+
+// ============== Display helpers ==============
+function fracHtml(f, mode = 'auto') {
+  if (f instanceof Slot) { mode = f.mode; f = f.val; }
+  if (f.isInt()) return `${f.n}`;
+  if (mode === 'dec') {
+    return parseFloat(f.num().toFixed(4)).toString();
+  }
+  const sign = f.n < 0 ? '−' : '';
+  return `${sign}<span class="fr"><span class="fn">${Math.abs(f.n)}</span><span class="fd">${f.d}</span></span>`;
+}
+
+function fracText(f, mode = 'auto') {
+  if (f instanceof Slot) { mode = f.mode; f = f.val; }
+  if (f.isInt()) return `${f.n}`;
+  if (mode === 'dec') return parseFloat(f.num().toFixed(3)).toString();
+  return `${f.n}/${f.d}`;
+}
+
+// Term in middle of expression (with leading sign): " + 3x", " − 1/2"
+function termStr(coef, varname, mode = 'auto') {
+  if (coef.isZero()) return '';
+  const sign = coef.isPos() ? ' + ' : ' − ';
+  const abs = coef.abs();
+  const hasVar = !!varname;
+  const numHtml = (hasVar && abs.isOne()) ? '' : fracHtml(abs, mode);
+  return sign + numHtml + (varname || '');
+}
+
+// Leading term: "3x", "−x", "1/2"
+function leadStr(coef, varname, mode = 'auto') {
+  if (coef.isZero()) return '0';
+  const sign = coef.isNeg() ? '−' : '';
+  const abs = coef.abs();
+  const hasVar = !!varname;
+  const numHtml = (hasVar && abs.isOne()) ? '' : fracHtml(abs, mode);
+  return sign + numHtml + (varname || '');
+}
+
+// Signed constant inside parens, with leading sign: "+ 3" or "− 1/2"
+function signedConst(coef, mode = 'auto') {
+  const sign = coef.isNeg() ? '− ' : '+ ';
+  return sign + fracHtml(coef.abs(), mode);
+}
+
+// "Factor prefix" for something like a(...). Strips a=±1 to "" / "−".
+function prefixStr(coef, mode = 'auto') {
+  if (coef.isOne()) return '';
+  if (coef.isNegOne()) return '−';
+  return leadStr(coef, '', mode);
+}
+
+// SVG-text version of leadStr (no HTML, slash form)
+function leadText(coef, varname, mode = 'auto') {
+  if (coef.isZero()) return '0';
+  const sign = coef.isNeg() ? '−' : '';
+  const abs = coef.abs();
+  const hasVar = !!varname;
+  const numTxt = (hasVar && abs.isOne()) ? '' : fracText(abs, mode);
+  return sign + numTxt + (varname || '');
+}
+
+// SVG-text term form (with leading sign)
+function termText(coef, varname, mode = 'auto') {
+  if (coef.isZero()) return '';
+  const sign = coef.isPos() ? ' + ' : ' − ';
+  const abs = coef.abs();
+  const hasVar = !!varname;
+  const numTxt = (hasVar && abs.isOne()) ? '' : fracText(abs, mode);
+  return sign + numTxt + (varname || '');
+}
+
+// ============== SVG helpers ==============
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const $ = (id) => document.getElementById(id);
+const svgDiag = $('diagram');
+
+function svgEl(tag, attrs = {}, parent = svgDiag) {
+  const el = document.createElementNS(SVG_NS, tag);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  parent.appendChild(el);
+  return el;
+}
+
+function svgText(x, y, text, opts = {}) {
+  const t = svgEl('text', {
+    x, y,
+    'text-anchor': opts.anchor || 'middle',
+    'font-size': opts.size || 14,
+    'font-weight': opts.weight || 'normal',
+    fill: opts.fill || '#1f2937',
+    'font-family': opts.family || '"Hiragino Mincho ProN", "Yu Mincho", serif'
+  });
+  t.textContent = text;
+  return t;
+}
+
+function clearSvg() {
+  const kids = Array.from(svgDiag.children);
+  for (const c of kids) {
+    if (c.tagName.toLowerCase() !== 'defs') svgDiag.removeChild(c);
+  }
+}
+
+const C = {
+  pos: '#bfdbfe', posS: '#2563eb',
+  neg: '#fecaca', negS: '#dc2626',
+  xsq: '#c7d2fe', xsqS: '#4338ca',
+  bsq: '#fde68a', bsqS: '#b45309',
+  abPos: '#dbeafe', abPosS: '#3b82f6',
+  cut:  '#f3f4f6', cutS:  '#9ca3af',
+  innerStroke: '#1e40af',
+  textDark: '#1f2937'
+};
+const HATCH_CSS = 'background-image:repeating-linear-gradient(45deg,#fecaca 0 5px,#dc2626 5px 6.5px);';
+
+function fillStrokeBySign(sign) {
+  return sign >= 0
+    ? { fill: C.pos, stroke: C.posS }
+    : { fill: 'url(#hatchNeg)', stroke: C.negS };
+}
+
+// ============== Slider + number-input builder ==============
+function buildControls(state, defs, normalize) {
+  const c = $('controls');
+  c.innerHTML = '';
+  const ctrls = {};
+
+  function syncAll(skipKey) {
+    defs.forEach(dd => {
+      const slot = state[dd.key];
+      ctrls[dd.key].slider.value = slot.toSliderValue();
+      if (dd.key !== skipKey) {
+        ctrls[dd.key].num.value = slot.toInputStr();
+      }
+    });
+  }
+
+  function applyValue(key, slot, fromNum, isCommit) {
+    const d = defs.find(x => x.key === key);
+    if (!slot) return;
+    const x = slot.val.num();
+
+    // Soft clamp on input box: clamp to [inputMin, inputMax] if defined,
+    // else hard clamp to [min, max].
+    const lo = d.inputMin ?? d.min;
+    const hi = d.inputMax ?? d.max;
+    if (x < lo) {
+      slot = new Slot(Frac.fromNumber(lo));
+    } else if (x > hi) {
+      slot = new Slot(Frac.fromNumber(hi));
+    }
+
+    // skipZero
+    if (d.skipZero && slot.val.isZero()) {
+      if (isCommit) {
+        const prev = state[key].val;
+        slot = new Slot(prev.isNeg() ? Frac.of(-1) : Frac.of(1), 'int');
+      } else return;
+    }
+
+    state[key] = slot;
+    if (normalize) normalize(state);
+    syncAll(fromNum && !isCommit ? key : null);
+    render();
+  }
+
+  defs.forEach(d => {
+    const wrap = document.createElement('label');
+    const name = document.createElement('span');
+    name.className = 'label-name';
+    name.textContent = d.label;
+
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.min = d.min;
+    slider.max = d.max;
+    slider.step = d.step ?? 0.5;
+    slider.value = state[d.key].toSliderValue();
+
+    const num = document.createElement('input');
+    num.type = 'text';
+    num.className = 'value-input';
+    num.value = state[d.key].toInputStr();
+    num.setAttribute('autocapitalize', 'off');
+    num.setAttribute('autocomplete', 'off');
+    num.setAttribute('spellcheck', 'false');
+
+    ctrls[d.key] = { slider, num };
+
+    slider.addEventListener('input', () => {
+      const x = parseFloat(slider.value);
+      applyValue(d.key, Slot.fromSliderNumber(x), false, true);
+    });
+
+    num.addEventListener('input', () => {
+      const slot = Slot.fromString(num.value);
+      if (!slot) return;
+      applyValue(d.key, slot, true, false);
+    });
+
+    num.addEventListener('change', () => {
+      let slot = Slot.fromString(num.value);
+      if (!slot) {
+        num.value = state[d.key].toInputStr();
+        return;
+      }
+      applyValue(d.key, slot, true, true);
+    });
+
+    num.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') num.blur();
+    });
+
+    wrap.appendChild(name);
+    wrap.appendChild(slider);
+    wrap.appendChild(num);
+    c.appendChild(wrap);
+  });
+}
+
+// Convenience: build initial state for a unit's controls
+function makeState(initial) {
+  const s = {};
+  for (const [k, v] of Object.entries(initial)) {
+    if (v instanceof Slot) s[k] = v;
+    else if (v instanceof Frac) s[k] = new Slot(v);
+    else s[k] = new Slot(Frac.fromNumber(v));
+  }
+  return s;
+}
+
+// Pull out the shared display mode for a pair (e.g., a*p): if either is dec, use dec
+function combinedMode(...slots) {
+  for (const s of slots) {
+    const m = s instanceof Slot ? s.mode : 'auto';
+    if (m === 'dec') return 'dec';
+  }
+  return 'auto';
+}
+
+// ============== Unit definitions ==============
+const UNITS = {};
+
+// ----- ① 共通因数: a·p·x + a·q = a(px + q) -----
+UNITS.common = {
+  state: makeState({ a: 3, p: 2, q: 5 }),
+  controls: [
+    { key: 'a', label: 'a', min: -15, max: 15, inputMin: -50, inputMax: 50, step: 0.5, skipZero: true },
+    { key: 'p', label: 'p', min: -15, max: 15, inputMin: -50, inputMax: 50, step: 0.5, skipZero: true },
+    { key: 'q', label: 'q', min: -25, max: 25, inputMin: -99, inputMax: 99, step: 0.5, skipZero: true },
+  ],
+  formula(s) {
+    const a = s.a.val, p = s.p.val, q = s.q.val;
+    const apx = a.mul(p);
+    const aq = a.mul(q);
+    const m = combinedMode(s.a, s.p, s.q);
+    const lhs = leadStr(apx, 'x', m) + termStr(aq, '', m);
+    const aPref = prefixStr(a, s.a.mode);
+    const inside = leadStr(p, 'x', s.p.mode) + termStr(q, '', s.q.mode);
+    return `<span class="lhs">${lhs}</span> = <span class="rhs">${aPref}(${inside})</span>`;
+  },
+  draw(s) {
+    clearSvg();
+    const aN = s.a.val.abs().num();
+    const pN = s.p.val.abs().num();
+    const qN = s.q.val.abs().num();
+    if (aN === 0 || (pN === 0 && qN === 0)) return;
+
+    const xL_b = 88, u_b = 22;
+    const aH_b = aN * u_b;
+    const pW_b = pN * xL_b;
+    const qW_b = qN * u_b;
+    const W_b = pW_b + qW_b;
+
+    const maxW = 400, maxH = 220;
+    const sc = Math.min(1, maxW / W_b, maxH / aH_b);
+    const aH = aH_b * sc, pW = pW_b * sc, qW = qW_b * sc;
+    const W = pW + qW;
+    const x0 = (480 - W) / 2;
+    const y0 = (360 - aH) / 2;
+
+    const apx = s.a.val.mul(s.p.val);
+    const aq  = s.a.val.mul(s.q.val);
+
+    if (pN > 0) {
+      const c1 = fillStrokeBySign(apx.isNeg() ? -1 : 1);
+      svgEl('rect', { x: x0, y: y0, width: pW, height: aH,
+        fill: c1.fill, stroke: c1.stroke, 'stroke-width': 2 });
+      svgText(x0 + pW/2, y0 + aH/2 + 7, leadText(apx, 'x', combinedMode(s.a, s.p)),
+        { size: 22, weight: 'bold', fill: C.textDark });
+    }
+    if (qN > 0) {
+      const c2 = fillStrokeBySign(aq.isNeg() ? -1 : 1);
+      svgEl('rect', { x: x0 + pW, y: y0, width: qW, height: aH,
+        fill: c2.fill, stroke: c2.stroke, 'stroke-width': 2 });
+      svgText(x0 + pW + qW/2, y0 + aH/2 + 7, leadText(aq, '', combinedMode(s.a, s.q)),
+        { size: 20, weight: 'bold', fill: C.textDark });
+    }
+
+    // Top labels
+    if (pN > 0) {
+      svgText(x0 + pW/2, y0 - 12, leadText(s.p.val, 'x', s.p.mode),
+        { size: 16, fill: C.textDark, weight: 'bold' });
+    }
+    if (qN > 0) {
+      svgText(x0 + pW + qW/2, y0 - 12, fracText(s.q.val, s.q.mode),
+        { size: 16, fill: C.textDark, weight: 'bold' });
+    }
+    // Left label: a (height)
+    svgText(x0 - 22, y0 + aH/2 + 6, fracText(s.a.val, s.a.mode),
+      { size: 18, weight: 'bold', fill: C.textDark });
+
+    // Bottom: combined width
+    svgText(x0 + W/2, y0 + aH + 32,
+      leadText(s.p.val, 'x', s.p.mode) + termText(s.q.val, '', s.q.mode),
+      { size: 18, weight: 'bold', fill: '#374151' });
+    svgEl('path', {
+      d: `M ${x0} ${y0+aH+8} L ${x0} ${y0+aH+14} L ${x0+W} ${y0+aH+14} L ${x0+W} ${y0+aH+8}`,
+      fill: 'none', stroke: '#9ca3af', 'stroke-width': 1.5
+    });
+  },
+  legend: () => `
+    <span><span class="swatch" style="background:${C.pos};border-color:${C.posS}"></span>正の項（加える）</span>
+    <span><span class="swatch" style="${HATCH_CSS}border-color:${C.negS}"></span>負の項（引く＝引かれる面積）</span>
+  `,
+  explanation(s) {
+    const a = s.a.val, p = s.p.val, q = s.q.val;
+    const apx = a.mul(p), aq = a.mul(q);
+    const m = combinedMode(s.a, s.p, s.q);
+    return `
+      <h3>共通因数 ${fracHtml(a, s.a.mode)} でくくり出す</h3>
+      <p>縦が <b>${fracHtml(a, s.a.mode)}</b>、横が <b>${leadStr(p,'x',s.p.mode)}${termStr(q,'',s.q.mode)}</b> の長方形を考える。
+      面積は <b>${prefixStr(a, s.a.mode) || fracHtml(a, s.a.mode)}(${leadStr(p,'x',s.p.mode)}${termStr(q,'',s.q.mode)}) = ${leadStr(apx,'x',m)}${termStr(aq,'',m)}</b>。</p>
+      <p>同じ面積を 2 つに分けると、左の <b>${leadStr(apx,'x',m)}</b> と右の <b>${fracHtml(aq, m)}</b>。
+      これが「<b>${leadStr(apx,'x',m)}${termStr(aq,'',m)}</b> は <b>${fracHtml(a, s.a.mode)}</b> でくくれる」ということ。</p>
+      <p style="color:var(--muted);font-size:13px">※ 面積は本来正の量だが、式の項としての値が負（係数がマイナス）の場合は、ここでは <b style="color:#dc2626">赤＋斜線</b> で「全体から<b>引かれる</b>面積」として表す。面積モデルと負の数はもともと相性が悪いので、色とパターンで補っている。</p>
+    `;
+  }
+};
+
+// ----- ② x² + (p+q)x + pq = (x+p)(x+q) -----
+UNITS.trinomial = {
+  state: makeState({ p: 2, q: 3 }),
+  controls: [
+    { key: 'p', label: 'p', min: -12, max: 12, inputMin: -50, inputMax: 50, step: 0.5, skipZero: true },
+    { key: 'q', label: 'q', min: -12, max: 12, inputMin: -50, inputMax: 50, step: 0.5, skipZero: true },
+  ],
+  formula(s) {
+    const p = s.p.val, q = s.q.val;
+    const sum = p.add(q), prod = p.mul(q);
+    const m = combinedMode(s.p, s.q);
+    const lhs = 'x²' + termStr(sum, 'x', m) + termStr(prod, '', m);
+    const rhs = `(x ${signedConst(p, s.p.mode)})(x ${signedConst(q, s.q.mode)})`;
+    return `<span class="lhs">${lhs}</span> = <span class="rhs">${rhs}</span>`;
+  },
+  draw(s) {
+    clearSvg();
+    const pN = s.p.val.abs().num();
+    const qN = s.q.val.abs().num();
+
+    const xL_b = 100, u_b = 18;
+    const W_b = xL_b + qN * u_b;
+    const H_b = xL_b + pN * u_b;
+
+    const maxW = 360, maxH = 320;
+    const sc = Math.min(1, maxW / W_b, maxH / H_b);
+    const xL = xL_b * sc, u = u_b * sc;
+    const W = xL + qN * u, H = xL + pN * u;
+    const x0 = (480 - W) / 2;
+    const y0 = (360 - H) / 2 + 6;
+
+    // x² (top-left)
+    svgEl('rect', { x: x0, y: y0, width: xL, height: xL,
+      fill: C.xsq, stroke: C.xsqS, 'stroke-width': 2 });
+    svgText(x0 + xL/2, y0 + xL/2 + 10, 'x²',
+      { size: Math.max(16, xL * 0.3), weight: 'bold', fill: C.xsqS });
+
+    // q·x (top-right)
+    if (qN > 0) {
+      const cQ = fillStrokeBySign(s.q.val.isNeg() ? -1 : 1);
+      svgEl('rect', { x: x0 + xL, y: y0, width: qN*u, height: xL,
+        fill: cQ.fill, stroke: cQ.stroke, 'stroke-width': 2 });
+      svgText(x0 + xL + qN*u/2, y0 + xL/2 + 7,
+        leadText(s.q.val, 'x', s.q.mode), { size: 16, weight: 'bold' });
+    }
+    // p·x (bottom-left)
+    if (pN > 0) {
+      const cP = fillStrokeBySign(s.p.val.isNeg() ? -1 : 1);
+      svgEl('rect', { x: x0, y: y0 + xL, width: xL, height: pN*u,
+        fill: cP.fill, stroke: cP.stroke, 'stroke-width': 2 });
+      svgText(x0 + xL/2, y0 + xL + pN*u/2 + 5,
+        leadText(s.p.val, 'x', s.p.mode), { size: 16, weight: 'bold' });
+    }
+    // p·q (bottom-right)
+    if (pN > 0 && qN > 0) {
+      const pq = s.p.val.mul(s.q.val);
+      const cPQ = fillStrokeBySign(pq.isNeg() ? -1 : 1);
+      svgEl('rect', { x: x0 + xL, y: y0 + xL,
+        width: qN*u, height: pN*u,
+        fill: cPQ.fill, stroke: cPQ.stroke, 'stroke-width': 2 });
+      svgText(x0 + xL + qN*u/2, y0 + xL + pN*u/2 + 5,
+        fracText(pq, combinedMode(s.p, s.q)), { size: 14, weight: 'bold' });
+    }
+
+    // Top label: x ± q
+    svgText(x0 + W/2, y0 - 12, `x ${(s.q.val.isNeg()?'−':'+')} ${fracText(s.q.val.abs(), s.q.mode)}`,
+      { size: 16, weight: 'bold', fill: '#374151' });
+    // Left label rotated: x ± p
+    const lx = x0 - 14, ly = y0 + H/2;
+    const leftLabel = svgText(lx, ly, `x ${(s.p.val.isNeg()?'−':'+')} ${fracText(s.p.val.abs(), s.p.mode)}`,
+      { size: 16, weight: 'bold', fill: '#374151' });
+    leftLabel.setAttribute('transform', `rotate(-90 ${lx} ${ly})`);
+  },
+  legend: () => `
+    <span><span class="swatch" style="background:${C.xsq};border-color:${C.xsqS}"></span>x²</span>
+    <span><span class="swatch" style="background:${C.pos};border-color:${C.posS}"></span>正の項（加える）</span>
+    <span><span class="swatch" style="${HATCH_CSS}border-color:${C.negS}"></span>負の項（引く）</span>
+  `,
+  explanation(s) {
+    const p = s.p.val, q = s.q.val;
+    const sum = p.add(q), prod = p.mul(q);
+    const m = combinedMode(s.p, s.q);
+    return `
+      <h3>(x ${signedConst(p, s.p.mode)})(x ${signedConst(q, s.q.mode)}) を面積で見る</h3>
+      <p>縦 <b>x ${signedConst(p, s.p.mode)}</b>、横 <b>x ${signedConst(q, s.q.mode)}</b> の長方形を、4 つに分けて足す：</p>
+      <ul>
+        <li>x × x = <b>x²</b></li>
+        <li>x の項（横）：<b>${leadStr(q,'x',s.q.mode)}</b></li>
+        <li>x の項（縦）：<b>${leadStr(p,'x',s.p.mode)}</b></li>
+        <li>角：<b>${fracHtml(p, s.p.mode)} × ${fracHtml(q, s.q.mode)} = ${fracHtml(prod, m)}</b></li>
+      </ul>
+      <p>合計：<b>x²${termStr(sum,'x',m)}${termStr(prod,'',m)}</b>。
+      x の係数は <b>p+q = ${fracHtml(sum, m)}</b>、定数項は <b>p×q = ${fracHtml(prod, m)}</b> になる。</p>
+      <p style="color:var(--muted);font-size:13px">※ p や q が負のとき、対応する長方形は <b style="color:#dc2626">赤＋斜線</b> で表す。これは「面積として加える」のではなく「<b>式の値として全体から引かれる項</b>」を意味する。</p>
+    `;
+  }
+};
+
+// ----- ③ 平方の差: a² − b² = (a+b)(a−b) -----
+UNITS.diff = {
+  state: makeState({ a: 5, b: 2 }),
+  controls: [
+    { key: 'a', label: 'a', min: 1, max: 20, inputMin: 0.5, inputMax: 50, step: 0.5 },
+    { key: 'b', label: 'b', min: 0.5, max: 19, inputMin: 0.5, inputMax: 49, step: 0.5 },
+  ],
+  normalize(s) {
+    if (s.b.val.cmp(s.a.val) >= 0) {
+      const half = s.a.val.mul(new Frac(1, 2));
+      s.b = new Slot(half);
+    }
+    if (s.b.val.isZero() || s.b.val.isNeg()) {
+      s.b = new Slot(new Frac(1, 2));
+    }
+  },
+  formula(s) {
+    const a = s.a.val, b = s.b.val;
+    const a2 = a.pow2(), b2 = b.pow2();
+    const m = combinedMode(s.a, s.b);
+    return `<span class="lhs">${fracHtml(a, s.a.mode)}² − ${fracHtml(b, s.b.mode)}² = ${fracHtml(a2.sub(b2), m)}</span>` +
+           ` = <span class="rhs">(${fracHtml(a, s.a.mode)} + ${fracHtml(b, s.b.mode)})(${fracHtml(a, s.a.mode)} − ${fracHtml(b, s.b.mode)}) = ${fracHtml(a.add(b), m)} × ${fracHtml(a.sub(b), m)}</span>`;
+  },
+  draw(s) {
+    clearSvg();
+    const aN = s.a.val.num();
+    const bN = s.b.val.num();
+    if (aN <= 0 || bN <= 0 || bN >= aN) return;
+
+    const u_b = 22;
+    const aSize_b = aN * u_b;
+    const w2_b = (aN + bN) * u_b;
+    const h2_b = (aN - bN) * u_b;
+    const arrowGap = 70;
+    const totalW_b = aSize_b + arrowGap + w2_b;
+    const sc = Math.min(1, 460 / totalW_b, 260 / aSize_b);
+    const u = u_b * sc;
+    const aSize = aN * u, bSize = bN * u;
+    const w2 = (aN + bN) * u, h2 = (aN - bN) * u;
+    const arrowG = arrowGap * sc;
+
+    const totalW = aSize + arrowG + w2;
+    let x1 = (480 - totalW) / 2;
+    if (x1 < 30) x1 = 30;
+    const y1 = (360 - aSize) / 2;
+
+    // Left strip (a-b) wide × a high
+    svgEl('rect', { x: x1, y: y1, width: (aN - bN)*u, height: aSize,
+      fill: C.pos, stroke: C.posS, 'stroke-width': 2 });
+    // Bottom-right strip: b wide × (a-b) high
+    svgEl('rect', { x: x1 + (aN - bN)*u, y: y1 + bSize, width: bSize, height: (aN - bN)*u,
+      fill: C.pos, stroke: C.posS, 'stroke-width': 2 });
+    // Cut-out b² square
+    svgEl('rect', { x: x1 + (aN - bN)*u, y: y1, width: bSize, height: bSize,
+      fill: C.cut, stroke: C.cutS, 'stroke-width': 2, 'stroke-dasharray': '5 4' });
+    svgText(x1 + (aN - bN)*u + bSize/2, y1 + bSize/2 + 5,
+      `${fracText(s.b.val, s.b.mode)}²`, { size: 13, fill: C.cutS, weight: 'bold' });
+    // Outer dashed border (a × a)
+    svgEl('rect', { x: x1, y: y1, width: aSize, height: aSize,
+      fill: 'none', stroke: '#9ca3af', 'stroke-width': 1, 'stroke-dasharray': '2 3' });
+    // Labels
+    svgText(x1 + aSize/2, y1 - 8, fracText(s.a.val, s.a.mode), { size: 14, weight: 'bold' });
+    svgText(x1 - 12, y1 + aSize/2 + 5, fracText(s.a.val, s.a.mode), { size: 14, weight: 'bold' });
+
+    // Arrow
+    const arrowX = x1 + aSize + arrowG/2;
+    svgText(arrowX, 184, '→', { size: 36, fill: C.posS, weight: 'bold' });
+
+    // Right rectangle: (a+b) × (a-b)
+    const x2 = x1 + aSize + arrowG;
+    const y2 = (360 - h2) / 2;
+    svgEl('rect', { x: x2, y: y2, width: w2, height: h2,
+      fill: C.pos, stroke: C.posS, 'stroke-width': 2 });
+    const m = combinedMode(s.a, s.b);
+    svgText(x2 + w2/2, y2 + h2/2 + 6,
+      fracText(s.a.val.add(s.b.val).mul(s.a.val.sub(s.b.val)), m), { size: 14, weight: 'bold' });
+    svgText(x2 + w2/2, y2 - 8,
+      `${fracText(s.a.val, s.a.mode)} + ${fracText(s.b.val, s.b.mode)} = ${fracText(s.a.val.add(s.b.val), m)}`,
+      { size: 12, weight: 'bold', fill: '#374151' });
+    svgText(x2 + w2 + 8, y2 + h2/2 + 5,
+      `${fracText(s.a.val, s.a.mode)} − ${fracText(s.b.val, s.b.mode)} = ${fracText(s.a.val.sub(s.b.val), m)}`,
+      { size: 12, weight: 'bold', anchor: 'start', fill: '#374151' });
+  },
+  legend: () => `
+    <span><span class="swatch" style="background:${C.pos};border-color:${C.posS}"></span>残る面積</span>
+    <span><span class="swatch" style="background:${C.cut};border-color:${C.cutS}"></span>切り取った b² 部分</span>
+  `,
+  explanation(s) {
+    const a = s.a.val, b = s.b.val;
+    const a2 = a.pow2(), b2 = b.pow2();
+    const m = combinedMode(s.a, s.b);
+    return `
+      <h3>大きい正方形から小さい正方形を切り取る</h3>
+      <p>1辺 <b>${fracHtml(a, s.a.mode)}</b> の正方形（面積 <b>${fracHtml(a2, s.a.mode)}</b>）から、1辺 <b>${fracHtml(b, s.b.mode)}</b> の正方形（面積 <b>${fracHtml(b2, s.b.mode)}</b>）を切り取った L 字の面積は <b>${fracHtml(a2.sub(b2), m)}</b>。</p>
+      <p>この L 字を切って並べ替えると、縦 <b>${fracHtml(a.sub(b), m)}</b>、横 <b>${fracHtml(a.add(b), m)}</b> の長方形になる（面積 <b>${fracHtml(a.add(b).mul(a.sub(b)), m)}</b> も等しい）。</p>
+      <p>つまり <b>a² − b² = (a + b)(a − b)</b>。</p>
+      <p style="color:var(--muted);font-size:13px">※ ここでは a, b は正の数で扱う（負を入れても b² は同じ値になるため）。</p>
+    `;
+  }
+};
+
+// ----- ④ (a + b)² = a² + 2ab + b²  / (a − b)² = a² − 2ab + b² -----
+UNITS.square = {
+  state: makeState({ a: 4, b: 2 }),
+  controls: [
+    { key: 'a', label: 'a', min: 0.5, max: 15, inputMin: 0.5, inputMax: 50, step: 0.5 },
+    { key: 'b', label: 'b', min: -12, max: 12, inputMin: -50, inputMax: 50, step: 0.5, skipZero: true },
+  ],
+  formula(s) {
+    const a = s.a.val, b = s.b.val;
+    const a2 = a.pow2(), twoAB = a.mul(b).scale(2), b2 = b.pow2();
+    const total = a.add(b).pow2();
+    const m = combinedMode(s.a, s.b);
+    const lhs = `(${fracHtml(a, s.a.mode)} ${signedConst(b, s.b.mode)})²`;
+    const expanded = leadStr(a2,'',m) + termStr(twoAB,'',m) + termStr(b2,'',m);
+    return `<span class="lhs">${lhs}</span> = <span class="rhs">${expanded} = ${fracHtml(total, m)}</span>`;
+  },
+  draw(s) {
+    clearSvg();
+    const aN = s.a.val.num();
+    const bN = s.b.val.num();
+    const absBN = Math.abs(bN);
+    if (aN <= 0) return;
+
+    const u_b = 32;
+    let totalSize_b;
+    if (bN > 0) totalSize_b = (aN + bN) * u_b;
+    else totalSize_b = aN * u_b;
+    const maxSize = 290;
+    const sc = Math.min(1, maxSize / totalSize_b);
+    const u = u_b * sc;
+    const aSize = aN * u, bSize = absBN * u;
+
+    if (bN > 0) {
+      const total = aSize + bSize;
+      const x0 = (480 - total) / 2;
+      const y0 = (360 - total) / 2;
+      // a²
+      svgEl('rect', { x: x0, y: y0, width: aSize, height: aSize,
+        fill: C.pos, stroke: C.posS, 'stroke-width': 2 });
+      svgText(x0 + aSize/2, y0 + aSize/2 + 9,
+        `a² = ${fracText(s.a.val.pow2(), s.a.mode)}`, { size: 16, weight: 'bold' });
+      // ab top-right
+      svgEl('rect', { x: x0 + aSize, y: y0, width: bSize, height: aSize,
+        fill: C.abPos, stroke: C.abPosS, 'stroke-width': 2 });
+      svgText(x0 + aSize + bSize/2, y0 + aSize/2 + 6,
+        `ab = ${fracText(s.a.val.mul(s.b.val), combinedMode(s.a, s.b))}`,
+        { size: 13, weight: 'bold' });
+      // ab bottom-left
+      svgEl('rect', { x: x0, y: y0 + aSize, width: aSize, height: bSize,
+        fill: C.abPos, stroke: C.abPosS, 'stroke-width': 2 });
+      svgText(x0 + aSize/2, y0 + aSize + bSize/2 + 6,
+        `ab = ${fracText(s.a.val.mul(s.b.val), combinedMode(s.a, s.b))}`,
+        { size: 13, weight: 'bold' });
+      // b²
+      svgEl('rect', { x: x0 + aSize, y: y0 + aSize, width: bSize, height: bSize,
+        fill: C.bsq, stroke: C.bsqS, 'stroke-width': 2 });
+      svgText(x0 + aSize + bSize/2, y0 + aSize + bSize/2 + 6,
+        `b² = ${fracText(s.b.val.pow2(), s.b.mode)}`, { size: 13, weight: 'bold' });
+
+      const m = combinedMode(s.a, s.b);
+      svgText(x0 + total/2, y0 - 10,
+        `a + b = ${fracText(s.a.val.add(s.b.val), m)}`,
+        { size: 14, weight: 'bold', fill: '#374151' });
+    } else {
+      // b < 0 : (a − |b|)²
+      const x0 = (480 - aSize) / 2;
+      const y0 = (360 - aSize) / 2;
+      // a²
+      svgEl('rect', { x: x0, y: y0, width: aSize, height: aSize,
+        fill: C.pos, stroke: C.posS, 'stroke-width': 2 });
+      svgText(x0 + aSize/2, y0 + aSize*0.18,
+        `a² = ${fracText(s.a.val.pow2(), s.a.mode)}`, { size: 14, weight: 'bold', fill: C.posS });
+      if (bSize <= aSize) {
+        const aabsB = s.a.val.mul(s.b.val.abs());
+        // Right strip (subtract)
+        svgEl('rect', { x: x0 + aSize - bSize, y: y0,
+          width: bSize, height: aSize,
+          fill: 'url(#hatchNeg)', stroke: C.negS, 'stroke-width': 2 });
+        svgText(x0 + aSize - bSize/2, y0 + aSize/2 + 6,
+          `−${fracText(aabsB, combinedMode(s.a, s.b))}`, { size: 13, weight: 'bold', fill: '#7f1d1d' });
+        // Bottom strip (subtract)
+        svgEl('rect', { x: x0, y: y0 + aSize - bSize,
+          width: aSize, height: bSize,
+          fill: 'url(#hatchNeg)', stroke: C.negS, 'stroke-width': 2 });
+        svgText(x0 + aSize*0.3, y0 + aSize - bSize/2 + 6,
+          `−${fracText(aabsB, combinedMode(s.a, s.b))}`, { size: 13, weight: 'bold', fill: '#7f1d1d' });
+        // b² added back
+        svgEl('rect', { x: x0 + aSize - bSize, y: y0 + aSize - bSize,
+          width: bSize, height: bSize,
+          fill: C.bsq, stroke: C.bsqS, 'stroke-width': 2 });
+        svgText(x0 + aSize - bSize/2, y0 + aSize - bSize/2 + 6,
+          `+${fracText(s.b.val.pow2(), s.b.mode)}`, { size: 13, weight: 'bold', fill: '#92400e' });
+        // Inner (a-|b|) square outline
+        const innerSize = aSize - bSize;
+        if (innerSize > 0) {
+          svgEl('rect', { x: x0, y: y0, width: innerSize, height: innerSize,
+            fill: 'none', stroke: C.innerStroke, 'stroke-width': 3, 'stroke-dasharray': '6 4' });
+          const m = combinedMode(s.a, s.b);
+          svgText(x0 + innerSize/2, y0 + innerSize/2 + 6,
+            `(${fracText(s.a.val.add(s.b.val), m)})² = ${fracText(s.a.val.add(s.b.val).pow2(), m)}`,
+            { size: 12, weight: 'bold', fill: '#1e3a8a' });
+        }
+      }
+      svgText(x0 + aSize/2, y0 - 10,
+        `a = ${fracText(s.a.val, s.a.mode)}`,
+        { size: 14, weight: 'bold', fill: '#374151' });
+    }
+  },
+  legend(s) {
+    if (s && s.b.val.isNeg()) {
+      return `
+        <span><span class="swatch" style="background:${C.pos};border-color:${C.posS}"></span>a²（加える）</span>
+        <span><span class="swatch" style="${HATCH_CSS}border-color:${C.negS}"></span>引く帯（−ab × 2）</span>
+        <span><span class="swatch" style="background:${C.bsq};border-color:${C.bsqS}"></span>足し戻す b²</span>
+        <span><span class="swatch" style="background:#fff;border:2px dashed ${C.innerStroke}"></span>結果：(a−|b|)² の正方形</span>
+      `;
+    }
+    return `
+      <span><span class="swatch" style="background:${C.pos};border-color:${C.posS}"></span>a²（加える）</span>
+      <span><span class="swatch" style="background:${C.abPos};border-color:${C.abPosS}"></span>ab（2つ・加える）</span>
+      <span><span class="swatch" style="background:${C.bsq};border-color:${C.bsqS}"></span>b²（加える）</span>
+    `;
+  },
+  explanation(s) {
+    const a = s.a.val, b = s.b.val;
+    const a2 = a.pow2(), b2 = b.pow2(), twoAB = a.mul(b).scale(2);
+    const result = a.add(b).pow2();
+    const m = combinedMode(s.a, s.b);
+    if (b.isPos()) {
+      return `
+        <h3>(a + b)² の面積モデル</h3>
+        <p>1辺 <b>${fracHtml(a.add(b), m)}</b> の正方形を、4つの長方形・正方形に分ける：</p>
+        <ul>
+          <li>左上：<b>a² = ${fracHtml(a2, s.a.mode)}</b></li>
+          <li>右上・左下：<b>a × b = ${fracHtml(a.mul(b), m)}</b>（2つ）</li>
+          <li>右下：<b>b² = ${fracHtml(b2, s.b.mode)}</b></li>
+        </ul>
+        <p>合計：<b>a² + 2ab + b² = ${fracHtml(a2, s.a.mode)} + ${fracHtml(twoAB, m)} + ${fracHtml(b2, s.b.mode)} = ${fracHtml(result, m)}</b></p>
+      `;
+    } else {
+      const absB = b.abs();
+      const twoAabsB = a.mul(absB).scale(2);
+      return `
+        <h3>(a − ${fracHtml(absB, s.b.mode)})² の面積モデル（b = ${fracHtml(b, s.b.mode)}）</h3>
+        <p>1辺 <b>a = ${fracHtml(a, s.a.mode)}</b> の正方形から、幅 <b>${fracHtml(absB, s.b.mode)}</b> の帯を縦・横の両方から<b>引き取る</b>（<b style="color:#dc2626">赤＋斜線</b>＝「引く」面積）。</p>
+        <p>右下の小さな正方形 <b>${fracHtml(b2, s.b.mode)}</b> は「2回引かれてしまう」ので、足し戻す（黄）。</p>
+        <p>結果：<b>a² − 2a×${fracHtml(absB, s.b.mode)} + ${fracHtml(absB, s.b.mode)}² = ${fracHtml(a2, s.a.mode)} − ${fracHtml(twoAabsB, m)} + ${fracHtml(b2, s.b.mode)} = ${fracHtml(result, m)}</b></p>
+        <p>これは点線で示した1辺 <b>${fracHtml(a.add(b), m)}</b> の正方形の面積と一致する。</p>
+        <p style="color:var(--muted);font-size:13px">※ 「赤＋斜線」は<b>引く</b>面積、「黄」は<b>足し戻す</b>面積。色と模様で「加える／引く」を区別している。</p>
+      `;
+    }
+  }
+};
+
+// ============== Render & switch ==============
+let currentUnit = 'common';
+
+function render() {
+  const u = UNITS[currentUnit];
+  $('formulaCard').innerHTML = u.formula(u.state);
+  u.draw(u.state);
+  $('explanation').innerHTML = u.explanation(u.state);
+  $('legend').innerHTML = (typeof u.legend === 'function') ? u.legend(u.state) : '';
+}
+
+function selectUnit(unit) {
+  currentUnit = unit;
+  for (const btn of $('tabs').children) {
+    btn.classList.toggle('active', btn.dataset.unit === unit);
+  }
+  const u = UNITS[unit];
+  buildControls(u.state, u.controls, u.normalize);
+  render();
+}
+
+$('tabs').addEventListener('click', (e) => {
+  const t = e.target.closest('button');
+  if (t && t.dataset.unit) selectUnit(t.dataset.unit);
+});
+
+selectUnit('common');
+</script>
+</body>
+</html>
